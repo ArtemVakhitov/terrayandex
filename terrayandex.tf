@@ -10,3 +10,18 @@ terraform {
 provider "yandex" {
   zone = "ru-central1-b"
 }
+
+variable "cpu" {
+  type = number
+  default = 1
+}
+
+variable "ram" {
+  type = number
+  default = 1
+}
+
+variable "instances" {
+  type = number
+  default = 1
+}
