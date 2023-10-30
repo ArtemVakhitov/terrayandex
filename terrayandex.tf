@@ -49,7 +49,7 @@ resource "yandex_compute_instance" "terra" {
     initialize_params {
       image_id = "fd8q5m87s3v0hmp06i5c"
       size = var.disk
-      type = ssd
+      type = "ssd"
     }
   }
 
