@@ -26,6 +26,11 @@ variable "instances" {
   default = 1
 }
 
+variable "disk" {
+  type = number
+  default = 15
+}
+
 resource "yandex_compute_instance" "terra" {
 
   count = var.instances
@@ -43,6 +48,7 @@ resource "yandex_compute_instance" "terra" {
   boot_disk {
     initialize_params {
       image_id = "fd8q5m87s3v0hmp06i5c"
+      size = var.disk
     }
   }
 
