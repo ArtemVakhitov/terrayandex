@@ -35,7 +35,7 @@ resource "yandex_compute_instance" "terra" {
 
   count = var.instances
 
-  name = "terra.${count.index}"
+  name = "terra-${count.index}"
 
   zone = "ru-central1-b"
   platform_id = "standard-v1"
