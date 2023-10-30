@@ -60,11 +60,4 @@ resource "yandex_compute_instance" "terra" {
   metadata = {
     ssh-keys = "ubuntu:${file("~/.ssh/id_ed25519.pub")}"
   }
-
-  connection {
-    host = self[count.index].network_interface.0.nat_ip_address
-    type = "ssh"
-    user = "ubuntu"
-    private_key = file("~/.ssh/devops-eng-yandex-kp.pem")
-  }
 }
