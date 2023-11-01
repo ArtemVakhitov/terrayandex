@@ -32,6 +32,10 @@ variable "disk" {
   default = 15
 }
 
+locals {
+  n = ""
+}
+
 # Assumptions about the inputs:
 # - No duplicate entries in "names"
 # - All list variables have identical lengths
@@ -41,15 +45,14 @@ resource "yandex_compute_instance" "terra" {
   for_each = toset(var.names)
 
   name = each.value
-
-  hostname = name
+  hostname = each.value
 
   zone = "ru-central1-b"
   platform_id = "standard-v1"
 
   resources {
-    cores  = var.cpu[index(var.names, name)]
-    memory = var.ram[index(var.names, name)]
+    cores  = var.cpu[index(var.names, each.value)]
+    memory = var.ram[index(var.names, each.value)]
   }
 
   boot_disk {
