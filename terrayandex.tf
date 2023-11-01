@@ -32,10 +32,6 @@ variable "disk" {
   default = 15
 }
 
-locals {
-  n = ""
-}
-
 # Assumptions about the inputs:
 # - No duplicate entries in "names"
 # - All list variables have identical lengths
