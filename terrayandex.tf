@@ -11,38 +11,45 @@ provider "yandex" {
   zone = "ru-central1-b"
 }
 
+variable "names" {
+  type = list(string)
+  default = ["host"]
+}
+
 variable "cpu" {
-  type = number
-  default = 1
+  type = list(number)
+  default = [1]
 }
 
 variable "ram" {
-  type = number
-  default = 1
+  type = list(number)
+  default = [1]
 }
 
-variable "instances" {
-  type = number
-  default = 1
-}
-
+# To simplify, make this identical for all hosts
 variable "disk" {
   type = number
   default = 15
 }
 
+# Assumptions about the inputs:
+# - No duplicate entries in "names"
+# - All list variables have identical lengths
+# No validation is done to check if the assumptions are correct.
 resource "yandex_compute_instance" "terra" {
 
-  count = var.instances
+  for_each = toset(var.names)
 
-  name = "terra-${count.index}"
+  name = each.value
+
+  hostname = name
 
   zone = "ru-central1-b"
   platform_id = "standard-v1"
 
   resources {
-    cores  = var.cpu
-    memory = var.ram
+    cores  = var.cpu[index(var.names, name)]
+    memory = var.ram[index(var.names, name)]
   }
 
   boot_disk {
