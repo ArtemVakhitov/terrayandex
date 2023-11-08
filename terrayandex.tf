@@ -11,34 +11,13 @@ provider "yandex" {
   zone = "ru-central1-b"
 }
 
-variable "names" {
-  type = list(string)
-  default = ["host"]
+locals {
+  names = ["build", "staging"]
 }
 
-variable "cpu" {
-  type = list(number)
-  default = [1]
-}
-
-variable "ram" {
-  type = list(number)
-  default = [1]
-}
-
-# To simplify, make this identical for all hosts
-variable "disk" {
-  type = number
-  default = 15
-}
-
-# Assumptions about the inputs:
-# - No duplicate entries in "names"
-# - All list variables have identical lengths
-# No validation is done to check if the assumptions are correct.
 resource "yandex_compute_instance" "terra" {
 
-  for_each = toset(var.names)
+  for_each = toset(local.names)
 
   name = each.value
   hostname = each.value
@@ -47,14 +26,14 @@ resource "yandex_compute_instance" "terra" {
   platform_id = "standard-v1"
 
   resources {
-    cores  = var.cpu[index(var.names, each.value)]
-    memory = var.ram[index(var.names, each.value)]
+    cores  = 2
+    memory = 2
   }
 
   boot_disk {
     initialize_params {
       image_id = "fd8q5m87s3v0hmp06i5c"
-      size = var.disk
+      size = 15
       type = "network-ssd"
     }
   }
@@ -67,4 +46,28 @@ resource "yandex_compute_instance" "terra" {
   metadata = {
     ssh-keys = "ubuntu:${file("~/.ssh/id_ed25519.pub")}"
   }
+}
+
+resource "local_file" "ansible_inventory" {
+  content  = <<-EOF
+								[build]
+								${yandex_compute_instance.terra["build"].network_interface.0.nat_ip_address}
+								[staging]
+								${yandex_compute_instance.terra["staging"].network_interface.0.nat_ip_address}
+								[all:vars]
+								ansible_user=ubuntu
+								ansible_ssh_common_args="-o StrictHostKeyChecking=no -o ConnectionAttempts=20"
+								ansible_become=yes
+								ansible_become_user=root
+                ansible_ssh_private_key_file=~/.ssh/id_dsa
+								EOF
+  filename = "${path.root}/hosts"
+}
+
+output "build_ip" {
+  value = yandex_compute_instance.terra["build"].network_interface.0.nat_ip_address
+}
+
+output "staging_ip" {
+  value = yandex_compute_instance.terra["build"].network_interface.0.nat_ip_address
 }
